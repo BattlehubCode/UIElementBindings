@@ -1,0 +1,19 @@
+{
+    "name": "Battlehub.UIElements.Bindings.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d7733b48c4aba004bbd4bbba1eec96a7",
+        "GUID:28efed321f1c6434092c7cc7e8702392"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

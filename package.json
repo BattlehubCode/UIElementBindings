@@ -1,6 +1,6 @@
 {
   "name": "net.battlehub.uielementbindings",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "displayName": "UI Element Bindings",
   "description": "Package for Unity that enables two-way data binding between Unity UIElements and game/business logic code. This reduces boiler-plate code that would otherwise be necessary for things like updating the UI when a property changes, removes the need for messy links between objects in the scene that can be broken easily, and allows easier unit testing of code by providing a layer of abstraction between the UI and your core logic code.",
   "unity": "2021.3",
