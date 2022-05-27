@@ -1,6 +1,5 @@
-
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using UnityEngine.UIElements;
 
 namespace Battlehub.UIElements.Bindings
@@ -27,7 +26,8 @@ namespace Battlehub.UIElements.Bindings
         internal static object FindViewModelFor<TViewModelsEnum>(this TViewModelsEnum viewModel, VisualElement element)
         {
             VisualElement parent = element;
-            while(true)
+            var parents = new Stack<VisualElement>();
+            while (true)
             {
                 ViewModelInstance<TViewModelsEnum> viewModelInstance = parent as ViewModelInstance<TViewModelsEnum>;
                 if(viewModelInstance != null && viewModelInstance.knownViewModel.Equals(viewModel))
@@ -41,31 +41,22 @@ namespace Battlehub.UIElements.Bindings
                 }
 
                 parent = parent.hierarchy.parent;
+                parents.Push(parent);
             }
 
-            return viewModel.FindViewModelInChildren(parent);
-
-        }
-
-        private static object FindViewModelInChildren<TViewModelsEnum>(this TViewModelsEnum viewModel, VisualElement element)
-        {
-            foreach(VisualElement child in element.Children())
+            while(parents.Count > 0)
             {
-                ViewModelInstance<TViewModelsEnum> viewModelInstance = child as ViewModelInstance<TViewModelsEnum>;
-                if (viewModelInstance != null && viewModelInstance.knownViewModel.Equals(viewModel))
+                foreach (VisualElement child in parents.Pop().Children())
                 {
-                    return viewModelInstance.instance;
+                    ViewModelInstance<TViewModelsEnum> viewModelInstance = child as ViewModelInstance<TViewModelsEnum>;
+                    if (viewModelInstance != null && viewModelInstance.knownViewModel.Equals(viewModel))
+                    {
+                        return viewModelInstance.instance;
+                    }
                 }
+
             }
 
-            foreach (VisualElement child in element.Children())
-            {
-                object instance = viewModel.FindViewModelInChildren(child);
-                if(instance != null)
-                {
-                    return instance;
-                }
-            }
             return null;
         }
     }

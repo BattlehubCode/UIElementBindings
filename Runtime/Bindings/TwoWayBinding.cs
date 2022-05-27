@@ -10,7 +10,6 @@ namespace Battlehub.UIElements.Bindings
 
     public class TwoWayBinding<TViewModelsEnum> : OneWayBinding<TViewModelsEnum>
     {
-
         private Delegate m_callback;
 
         protected override void Bind()
@@ -24,7 +23,7 @@ namespace Battlehub.UIElements.Bindings
 
                 m_callback = CreateCallback(eventType, nameof(TwoWayBinding<TViewModelsEnum>.OnCallback));
 
-                m_callback.DynamicInvoke(new object[1] { new ChangeEvent<string>() });
+                m_callback.DynamicInvoke(new object[1] { Activator.CreateInstance(eventType) });
                 RegisterCallback(eventType, m_callback);
             }
         }

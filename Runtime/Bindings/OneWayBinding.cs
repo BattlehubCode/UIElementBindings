@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
 using UnityEngine.UIElements;
 
 namespace Battlehub.UIElements.Bindings
 {
-    public class OneWayBindingUxmlTraits<TViewModelsEnum> : BindingCoreElementTraits<TViewModelsEnum> where TViewModelsEnum : struct, IConvertible
+    public class OneWayBindingUxmlTraits<TViewModelsEnum> : BaseBindingUxmlTraits<TViewModelsEnum> where TViewModelsEnum : struct, IConvertible
     {
         private UxmlStringAttributeDescription m_viewModelPropertyName =
             new UxmlStringAttributeDescription { name = "view-model-property-name", defaultValue = "" };
@@ -17,7 +16,13 @@ namespace Battlehub.UIElements.Bindings
 
         public override IEnumerable<UxmlAttributeDescription> uxmlAttributesDescription
         {
-            get { return base.uxmlAttributesDescription.Union(new UxmlAttributeDescription[] { m_viewModelPropertyName, m_viewPropertyName }); }
+            get 
+            {
+                yield return m_viewName;
+                yield return m_viewPropertyName;
+                yield return m_knownViewModelName;
+                yield return m_viewModelPropertyName;   
+            }
         }
 
         public override void Init(VisualElement ve, IUxmlAttributes bag, CreationContext cc)
@@ -30,7 +35,7 @@ namespace Battlehub.UIElements.Bindings
         }
     }
 
-    public class OneWayBinding<TViewModelsEnum> : BindingCoreElement<TViewModelsEnum>
+    public class OneWayBinding<TViewModelsEnum> : BaseBinding<TViewModelsEnum>
     {
         public string viewModelPropertyName
         {
@@ -42,18 +47,6 @@ namespace Battlehub.UIElements.Bindings
         {
             get;
             set;
-        }
-
-        protected object view
-        {
-            get;
-            private set;
-        }
-        
-        protected object viewModel
-        {
-            get;
-            private set;
         }
 
         protected PropertyInfo viewPropertyInfo
@@ -75,38 +68,20 @@ namespace Battlehub.UIElements.Bindings
             get { return viewModelPropertyInfo.GetValue(viewModel); }
         }
 
-        public OneWayBinding()
+        protected override void Bind()
         {
-            RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
-            RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
-        }
-
-        private void OnAttachToPanel(AttachToPanelEvent e)
-        {
-            viewModel = knownViewModel.FindViewModelFor(this);
-            if (viewModel == null)
-            {
-                return;
-            }
-            Bind();
-        }
-
-        private void OnDetachFromPanel(DetachFromPanelEvent e)
-        {
-            if (viewModel == null)
-            {
-                return;
-            }
-
-            Unbind();
-        }
-
-
-        protected virtual void Bind()
-        {
-            view = hierarchy.parent;
             viewPropertyInfo = view.GetType().GetProperty(viewPropertyName);
+            if(viewPropertyInfo == null)
+            {
+                throw new BindingException($"view property {viewPropertyName} not found");
+            }
+
             viewModelPropertyInfo = viewModel.GetType().GetProperty(viewModelPropertyName);
+            if (viewModelPropertyInfo == null)
+            {
+                throw new BindingException($"view model property {viewModelPropertyName} not found");
+            }
+
             m_notifyPropertyChanged = viewModel as INotifyPropertyChanged;
             if (m_notifyPropertyChanged != null)
             {
@@ -116,10 +91,8 @@ namespace Battlehub.UIElements.Bindings
             SyncWithViewModel();
         }
 
-        protected virtual void Unbind()
+        protected override void Unbind()
         {
-            viewModel = null;
-            view = null;
             viewPropertyInfo = null;
             viewModelPropertyInfo = null;
             if (m_notifyPropertyChanged != null)
